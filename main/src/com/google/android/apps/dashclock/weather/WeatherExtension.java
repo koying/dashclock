@@ -334,10 +334,53 @@ public class WeatherExtension extends DashClockExtension {
         LocationInfo li = new LocationInfo();
 
         // first=tagname (admin1, locality3) second=woeid
+        String city = "";
+        String country_iso = "";
         String primaryWoeid = null;
         List<Pair<String,String>> alternateWoeids = new ArrayList<Pair<String, String>>();
 
         HttpURLConnection connection = Utils.openUrlConnection(buildPlaceSearchUrl(location));
+        try {
+            XmlPullParser xpp = sXmlPullParserFactory.newPullParser();
+            xpp.setInput(new InputStreamReader(connection.getInputStream()));
+
+            boolean inCity = false;
+            boolean inCountry = false;
+            int eventType = xpp.getEventType();
+
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                String tagName = xpp.getName();
+
+                if (eventType == XmlPullParser.START_TAG && "city".equals(tagName)) {
+                    inCity = true;
+                } else if (eventType == XmlPullParser.TEXT && inCity) {
+                    city = xpp.getText();
+                }
+
+                if (eventType == XmlPullParser.START_TAG && "country_code".equals(tagName)) {
+                    inCountry = true;
+                } else if (eventType == XmlPullParser.TEXT && inCountry) {
+                    country_iso = xpp.getText();
+                }
+
+                if (eventType == XmlPullParser.END_TAG) {
+                    inCity = false;
+                    inCountry = false;
+                }
+
+                eventType = xpp.next();
+            }
+
+        } catch (XmlPullParserException e) {
+            throw new IOException("Error parsing location XML response.", e);
+        } finally {
+            connection.disconnect();
+        }
+
+        if (city.isEmpty() || country_iso.isEmpty())
+            return null;
+
+        connection = Utils.openUrlConnection(buildWoeidSearchUrl(city, country_iso));
         try {
             XmlPullParser xpp = sXmlPullParserFactory.newPullParser();
             xpp.setInput(new InputStreamReader(connection.getInputStream()));
@@ -419,9 +462,14 @@ public class WeatherExtension extends DashClockExtension {
     }
 
     private static String buildPlaceSearchUrl(Location l) throws MalformedURLException {
+        // OpenStreetMap / Mapquest nominatim API
+        return "http://open.mapquestapi.com/nominatim/v1/reverse?"
+                + "lat=" + l.getLatitude() + "&lon=" + l.getLongitude();
+    }
+
+    private static String buildWoeidSearchUrl(String city, String country_iso) throws MalformedURLException {
         // GeoPlanet API
-        return "http://where.yahooapis.com/v1/places.q('"
-                + l.getLatitude() + "," + l.getLongitude() + "')"
+        return "http://where.yahooapis.com/v1/places.q('" + city + "','" + country_iso + "')"
                 + "?appid=kGO140TV34HVTae_DDS93fM_w3AJmtmI23gxUFnHKWyrOGcRzoFjYpw8Ato6BxhvbTg-";
     }
 

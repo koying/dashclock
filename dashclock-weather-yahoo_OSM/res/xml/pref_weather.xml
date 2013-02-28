@@ -1,5 +1,5 @@
 <!--
-  Copyright 2012 Google Inc.
+  Copyright 2013 Google Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -25,10 +25,5 @@
         android:defaultValue="f"
         android:negativeButtonText="@null"
         android:positiveButtonText="@null" />
-
-    <com.google.android.apps.dashclock.configuration.AppChooserPreference
-        android:key="pref_weather_shortcut"
-        android:title="@string/pref_shortcut_title"
-        app:allowUseDefault="true" />
 
 </PreferenceScreen>

@@ -61,6 +61,7 @@
       <directory url="file://$PROJECT_DIR$/main/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/example-extension/gen" includeSubdirectories="true" />
       <directory url="file://$PROJECT_DIR$/api/gen" includeSubdirectories="true" />
+      <directory url="file://$PROJECT_DIR$/dashclock-weather-yahoo_OSM/gen" includeSubdirectories="true" />
     </excludeFromCompile>
     <resourceExtensions>
       <entry name=".+\.(properties|xml|html|dtd|tld)" />
@@ -260,6 +261,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/api/api.iml" filepath="$PROJECT_DIR$/api/api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dashclock-weather-yahoo_OSM/dashclock-weather-yahoo_OSM.iml" filepath="$PROJECT_DIR$/dashclock-weather-yahoo_OSM/dashclock-weather-yahoo_OSM.iml" />
       <module fileurl="file://$PROJECT_DIR$/example-extension/example-extension.iml" filepath="$PROJECT_DIR$/example-extension/example-extension.iml" />
       <module fileurl="file://$PROJECT_DIR$/main/main.iml" filepath="$PROJECT_DIR$/main/main.iml" />
     </modules>

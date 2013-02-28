@@ -324,8 +324,6 @@ public class WeatherOsmExtension extends DashClockExtension {
         String city = "";
         String county = "";
         String country_iso = "";
-        String primaryWoeid = null;
-        List<Pair<String,String>> alternateWoeids = new ArrayList<Pair<String, String>>();
 
         HttpURLConnection connection = openUrlConnection(buildPlaceSearchUrl(location));
         try {
@@ -378,6 +376,9 @@ public class WeatherOsmExtension extends DashClockExtension {
         if (city.isEmpty() || country_iso.isEmpty())
             return null;
 
+        String primaryWoeid = null;
+        String countryCode = "";
+        List<Pair<String,String>> alternateWoeids = new ArrayList<Pair<String, String>>();
         connection = openUrlConnection(buildWoeidSearchUrl(city, country_iso));
         try {
             XmlPullParser xpp = sXmlPullParserFactory.newPullParser();
@@ -394,6 +395,15 @@ public class WeatherOsmExtension extends DashClockExtension {
                     inWoe = true;
                 } else if (eventType == XmlPullParser.TEXT && inWoe) {
                     primaryWoeid = xpp.getText();
+                }
+
+                if (eventType == XmlPullParser.START_TAG && tagName.startsWith("country")) {
+                    for (int i = xpp.getAttributeCount() - 1; i >= 0; i--) {
+                        String attrName = xpp.getAttributeName(i);
+                        if ("code".equals(attrName)) {
+                            countryCode = xpp.getAttributeValue(i);
+                        }
+                    }
                 }
 
                 if (eventType == XmlPullParser.START_TAG &&
@@ -416,6 +426,12 @@ public class WeatherOsmExtension extends DashClockExtension {
                 }
 
                 if (eventType == XmlPullParser.END_TAG) {
+                    if ("place".equals(tagName) && !countryCode.equalsIgnoreCase(country_iso)) {
+                        primaryWoeid = null;
+                        countryCode = "";
+                        li.town = null;
+                        alternateWoeids.clear();
+                    }
                     inWoe = false;
                     inTown = false;
                 }
@@ -474,7 +490,7 @@ public class WeatherOsmExtension extends DashClockExtension {
             e.printStackTrace();
             return null;
         }
-        return "http://where.yahooapis.com/v1/places.q(" + query + ")"
+        return "http://where.yahooapis.com/v1/places.q(" + query + ");count=5"
                 + "?appid=kGO140TV34HVTae_DDS93fM_w3AJmtmI23gxUFnHKWyrOGcRzoFjYpw8Ato6BxhvbTg-";
     }
 
